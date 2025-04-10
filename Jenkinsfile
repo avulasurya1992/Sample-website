@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'node1' }
 
     triggers {
         githubPush()
@@ -10,6 +10,26 @@ pipeline {
     }
 
     stages {
+        stage('Install Git') {
+            steps {
+                script {
+                    sh '''
+                    if ! which git > /dev/null 2>&1; then
+                        echo "Installing Git..."
+                        if [ -f /etc/debian_version ]; then
+                            sudo apt-get update
+                            sudo apt-get install -y git
+                        elif [ -f /etc/redhat-release ]; then
+                            sudo yum install -y git
+                        fi
+                    else
+                        echo "Git is already installed."
+                    fi
+                    '''
+                }
+            }
+        }
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/avulasurya1992/Sample-website.git'
@@ -19,7 +39,6 @@ pipeline {
         stage('Install Apache HTTPD') {
             steps {
                 script {
-                    // Install Apache only if not already installed
                     sh '''
                     if ! which httpd > /dev/null 2>&1 && ! which apache2 > /dev/null 2>&1; then
                         echo "Installing Apache..."
@@ -44,7 +63,6 @@ pipeline {
         stage('Deploy Website') {
             steps {
                 script {
-                    // Copy the website files to Apache's web root
                     sh '''
                     echo "Deploying website..."
                     sudo rm -rf ${APP_DIR}/*
