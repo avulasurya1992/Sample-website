@@ -10,26 +10,7 @@ pipeline {
     }
 
     stages {
-        stage('Install Git') {
-            steps {
-                script {
-                    sh '''
-                    if ! which git > /dev/null 2>&1; then
-                        echo "Installing Git..."
-                        if [ -f /etc/debian_version ]; then
-                            sudo apt-get update
-                            sudo apt-get install -y git
-                        elif [ -f /etc/redhat-release ]; then
-                            sudo yum install -y git
-                        fi
-                    else
-                        echo "Git is already installed."
-                    fi
-                    '''
-                }
-            }
-        }
-
+        
         stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/avulasurya1992/Sample-website.git'
